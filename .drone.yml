@@ -1,24 +1,28 @@
-kind: pipeline
-type: docker
-name: default
+kind: pipeline  
+type: docker  
+name: default  
+  
+steps:  
+  - name: build  
+    image: maven:3.8.1-jdk-11  
+    commands:  
+      - mvn clean compile  # 编译Java代码  
+      - mvn test           # 运行单元测试  
+  
 
-steps:
-  - name: compile
-    image: openjdk:17
-    commands:
-      - javac -d out src/**/*.java   # 编译所有 Java 源文件到指定的输出目录 (out)
-      
-  - name: run
-    image: openjdk:17
-    commands:
-      - java -cp out Main            # 运行编译后的 Java 程序，假设主类是 Main
-      
-  - name: test
-    image: openjdk:17
-    commands:
-      - java -cp out org.junit.runner.JUnitCore YourTestClass  # 运行测试类，假设你使用 JUnit 进行测试
-
-  - name: package
-    image: openjdk:17
-    commands:
-      - jar cvf your-app.jar -C out/ .  # 将编译后的类文件打包成 JAR 文件
+  
+# （可选）如果你的项目还包含其他需要执行的步骤，比如静态代码分析、依赖检查等，可以在这里添加更多的步骤  
+  
+# （可选）部署步骤，这通常依赖于你的部署环境（如Kubernetes、Docker Compose、Heroku等）  
+# 注意：部署步骤可能会更复杂，并且可能需要额外的配置和凭证  
+# - name: deploy  
+#   image: some-deployment-image  
+#   commands:  
+#     - some-deployment-commands  
+  
+# 注意：  
+# 1. 确保你的Drone CI/CD环境已经配置好了，包括必要的Docker镜像拉取权限、Git仓库访问权限等。  
+# 2. 如果你的项目不在Git仓库的根目录下，你可能需要在`.drone.yml`中设置`working_dir`来指定Maven命令应该执行的目录。  
+# 3. 如果你的项目使用了其他构建工具（如Gradle），则需要相应地更改`image`和`commands`字段。  
+# 4. 如果你的项目有特定的Maven配置（如自定义的Maven镜像仓库、插件配置等），你可能需要在`pom.xml`文件中进行配置，而不是在`.drone.yml`中。  
+# 5. 如果你在CI/CD流程中需要执行更复杂的操作（如多阶段构建、条件构建等），你可以查阅Drone的官方文档来了解更多高级功能。
