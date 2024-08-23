@@ -1,32 +1,24 @@
-kind: pipeline  
-type: docker  
-name: default  
-  
-steps:  
-  # 编译Java代码  
-  - name: compile  
-    image: maven:3.8.1-jdk-11  
-    commands:  
-      - mvn clean compile  
-  
-  # 运行JUnit测试  
-  - name: test  
-    image: maven:3.8.1-jdk-11  
-    commands:  
-      - mvn test  
-  
-  # （可选）执行Nikto扫描（假设你有Web应用需要扫描）  
-  # 注意：这里假设你的Nikto Docker镜像名为local-nikto:latest  
-  - name: web-security-scan  
-    image: local-nikto:latest  
-    commands:  
-      - nikto -host your-web-app-url.com  
-    # 如果你的Web应用不是公开可访问的，你可能需要使用其他方法来暴露它给Nikto扫描  
-    # 例如，通过配置网络、使用Docker Compose或Kubernetes来模拟部署环境  
-  
-# （可选）其他步骤，如打包、部署等...  
-  
-# 注意：  
-# 1. 确保你的Drone环境可以访问`local-nikto:latest`镜像，或者将其推送到一个可从CI/CD环境中访问的Docker仓库。  
-# 2. 如果你的Java项目没有部署Web应用，或者你不打算在CI/CD流程中包含Web安全扫描，那么你可以移除或注释掉`web-security-scan`步骤。  
-# 3. 根据你的项目结构和需求，你可能需要调整Maven命令或添加额外的步骤（如代码格式检查、依赖更新等）。
+kind: pipeline
+type: docker
+name: default
+
+steps:
+  - name: compile
+    image: openjdk:17
+    commands:
+      - javac -d out src/**/*.java   # 编译所有 Java 源文件到指定的输出目录 (out)
+      
+  - name: run
+    image: openjdk:17
+    commands:
+      - java -cp out Main            # 运行编译后的 Java 程序，假设主类是 Main
+      
+  - name: test
+    image: openjdk:17
+    commands:
+      - java -cp out org.junit.runner.JUnitCore YourTestClass  # 运行测试类，假设你使用 JUnit 进行测试
+
+  - name: package
+    image: openjdk:17
+    commands:
+      - jar cvf your-app.jar -C out/ .  # 将编译后的类文件打包成 JAR 文件
