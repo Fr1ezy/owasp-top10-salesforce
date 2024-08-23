@@ -1,0 +1,41 @@
+# 定义这是一个pipeline类型的配置文件  
+kind: pipeline  
+# 指定使用Docker类型的执行环境  
+type: docker  
+# 定义pipeline的名称  
+name: default  
+  
+# 定义pipeline中的步骤  
+steps:  
+  # 第一个步骤：构建项目  
+  - name: build  
+    # 使用Maven 3.8.1和JDK 11的Docker镜像  
+    image: maven:3.8.1-jdk-11  
+    # 在该镜像中执行的命令  
+    commands:  
+      # 清理旧的构建文件，安装项目依赖，并编译项目  
+      - mvn clean install -B  
+  
+  # 第二个步骤：测试项目  
+  - name: test  
+    # 同样使用Maven 3.8.1和JDK 11的Docker镜像  
+    image: maven:3.8.1-jdk-11  
+    # 在该镜像中执行的命令  
+    commands:  
+      # 运行项目的测试  
+      - mvn test  
+  
+# 定义触发pipeline的条件  
+trigger:  
+  # 当在以下分支上发生push事件时，触发pipeline  
+  branch:  
+    - main  
+    - master  
+  # 触发事件类型，这里只设置了push事件  
+  event:  
+    - push  
+  
+# 注释：这个配置文件是一个简单的Java Maven项目CI/CD流程。  
+# 它包括两个步骤：构建和测试。构建步骤使用Maven清理并安装项目，测试步骤则运行项目的测试。  
+# 触发条件设置为在main或master分支上发生push事件时触发pipeline。  
+# 注意：这个配置没有包含缓存、部署或通知的步骤，这些都是可选的，可以根据项目需求来添加。
